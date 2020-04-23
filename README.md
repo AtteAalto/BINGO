@@ -125,20 +125,20 @@ If some time series correspond to gene knockout/knockdown experiments, then that
 
 Method parameters are given to the _BINGO_-function as a structure called parameters. The values are set in the file _BINGO_init_, and it is not necessary to change these parameters, although it is advised that the user chooses a good value for the _link_pr_ parameter. The parameter fields are:  
 
-    -_link_pr_: The prior for networks is that the existence of each link is independent of others. If a link exists with (prior) probability _p_, then _link_pr_ = _p_ / (1-_p_). This parameter controls the level of sparsity in the network samples. This should be specified by the user. For example, if there are 50 nodes, and it is expected that each node has about 2-3 (incoming/outgoing) links, then one should set, for example, _p_ = 2.5 / 50. However, if the user does not provide the parameter, the default value is _link_pr_ = 1/_n_.    
-    -_its_: number of iterations.   
-    -_nstep_: number of steps in the “continuous” trajectory between the measurement times. Default value is 4. It can be reduced to 3 or even 2 if the sampling takes a very long time. If it is one, the method reduces to a kind of a discrete-time GPDM.  
-    -_Theur_: a temperature variable used in a heuristic scheme to speed up the topology sampling. If _Theur_ is one, it corresponds to exact sampling. Higher _Theur_ improves the acceptance probability of the topology sampling.
+  -_link_pr_: The prior for networks is that the existence of each link is independent of others. If a link exists with (prior) probability _p_, then _link_pr_ = _p_ / (1-_p_). This parameter controls the level of sparsity in the network samples. This should be specified by the user. For example, if there are 50 nodes, and it is expected that each node has about 2-3 (incoming/outgoing) links, then one should set, for example, _p_ = 2.5 / 50. However, if the user does not provide the parameter, the default value is _link_pr_ = 1/_n_.      
+  -_its_: number of iterations.   
+  -_nstep_: number of steps in the “continuous” trajectory between the measurement times. Default value is 4. It can be reduced to 3 or even 2 if the sampling takes a very long time. If it is one, the method reduces to a kind of a discrete-time GPDM.  
+  -_Theur_: a temperature variable used in a heuristic scheme to speed up the topology sampling. If _Theur_ is one, it corresponds to exact sampling. Higher _Theur_ improves the acceptance probability of the topology sampling.
     
 A number of different __step size parameters__ can be set by the user. Shorter step sizes increase the acceptance rates of the MCMC sampling, but it has a negative effect on the efficiency of the exploration of the parameter space. Note that hyperparameters _gamma_, _beta_, _a_, and _b_ are sampled together. If their acceptance probability drops, either one or more of these can have too long step sizes. Similarly, the trajectory is sampled together with the noise variance _q_.  
 
-    -_etraj_: step size for the Crank—Nicolson sampler for the continuous trajectory. Default value is 0.15, and it is recommended that this is at least 0.1. It can be adjusted if the acceptation probability for the trajectory becomes low, which may happen if there are several experiments in the data.  
-    -_ea_: step size for sampling the _a_-parameters in the mean function.  
-    -_eb_: step size for sampling the _b_-parameters in the mean function.  
-    -_egamma_: step size for sampling the _gamma_-parameter in the GP covariance.  
-    -_ebeta_: step size for sampling the _beta_-parameter in the GP covariance.  
-    -_er_: step size for sampling the measurement error variance _r_.  
-    -_eq_: step size for sampling the process noise covariance _q_.  
+  -_etraj_: step size for the Crank—Nicolson sampler for the continuous trajectory. Default value is 0.15, and it is recommended that this is at least 0.1. It can be adjusted if the acceptation probability for the trajectory becomes low, which may happen if there are several experiments in the data.  
+  -_ea_: step size for sampling the _a_-parameters in the mean function.  
+  -_eb_: step size for sampling the _b_-parameters in the mean function.  
+  -_egamma_: step size for sampling the _gamma_-parameter in the GP covariance.  
+  -_ebeta_: step size for sampling the _beta_-parameter in the GP covariance.  
+  -_er_: step size for sampling the measurement error variance _r_.  
+  -_eq_: step size for sampling the process noise covariance _q_.  
 
 Not part of the parameters-structure is _nr_pi_, which is the number of pseudoinputs used in the GP regression in the code. Higher number improves accuracy, but slows down sampling.
 
@@ -163,10 +163,10 @@ __Possible solutions:__
   
 `parfor`-loop  
 
-	 2. Run _BINGO_init_;  
-	 3. The burn-in can be shortened by setting _parameters.its_=1000 (for example, default is 3000);  
-	 4. Run _BINGO_ with a suitable number of iterations;  
-	 5. Store results;  
+  2. Run _BINGO_init_;  
+  3. The burn-in can be shortened by setting _parameters.its_=1000 (for example, default is 3000);  
+  4. Run _BINGO_ with a suitable number of iterations;  
+  5. Store results;  
 `end`
 
   6. Sum up the different _Plink_ matrices and divide by the total number of samples.
