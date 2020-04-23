@@ -9,3 +9,4 @@ in gene regulatory network inference", [arXiv:1808.09161](https://arxiv.org/abs/
 Please cite the article if you use the method in your project. Further instructions on the method can be found in the 
 file readme_BINGO.
 
+Method is tested with Matlab 2017a.
