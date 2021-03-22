@@ -127,7 +127,7 @@ Method parameters are given to the _BINGO_-function as a structure called parame
     
 A number of different __step size parameters__ can be set by the user. Shorter step sizes increase the acceptance rates of the MCMC sampling, but it has a negative effect on the efficiency of the exploration of the parameter space. Note that hyperparameters _gamma_, _beta_, _a_, and _b_ are sampled together. If their acceptance probability drops, either one or more of these can have too long step sizes. Similarly, the trajectory is sampled together with the noise variance _q_.  
 
-  - _etraj_: step size for the Crank—Nicolson sampler for the continuous trajectory. Default value is 0.15, and it is recommended that this is at least 0.1. It can be adjusted if the acceptation probability for the trajectory becomes low, which may happen if there are several experiments in the data.  
+  - _etraj_: step size for the Crank—Nicolson sampler for the continuous trajectory. Default value is 0.06, and it is recommended that this is at least 0.05. It can be adjusted if the acceptation probability for the trajectory becomes low, which may happen if there are several experiments in the data.  
   - _ea_: step size for sampling the _a_-parameters in the mean function.  
   - _eb_: step size for sampling the _b_-parameters in the mean function.  
   - _egamma_: step size for sampling the _gamma_-parameter in the GP covariance.  
@@ -141,14 +141,14 @@ Not part of the parameters-structure is _nr_pi_, which is the number of pseudoin
 
 __Problem:__ The acceptance probabilities for the trajectory and the topology are (almost) zero.
 
-__Possible solutions:__ The step size of the trajectory (_parameters.etraj_) can be reduced, but it should not be below 0.1. It is possible that the initial value for the process noise covariance is too small. Try to increase it by changing it inside the file _BINGO_init_ (_state.q_). There is also a heuristic temperature variable (_parameters.Theur_) which is one by default. It can be increased to about 1.5 to speed-up topology sampling. However, this method is heuristic, and then the sampling is not exactly what is claimed.
+__Possible solutions:__ The step size of the trajectory (_parameters.etraj_) can be reduced, but it should not be below 0.05. It is possible that the initial value for the process noise covariance is too small. Try to increase it by changing it inside the file _BINGO_init_ (_state.q_). There is also a heuristic temperature variable (_parameters.Theur_) which is one by default. It can be increased to about 1.5 to speed-up topology sampling. However, this method is heuristic, and then the sampling is not exactly what is claimed.
 
 __Problem:__ The method is very slow.
 
 __Possible solutions:__ 
   1. Consider parallelisation (see below).
-  2. The gene expression trajectory is sampled on a finer grid where each measurement interval is divided into four parts (by default). This can be made coarser by changing _nstep_=3 inside the function _BINGO_init_.
-  3. Number of pseudoinputs can be reduced inside _BINGO_init_ by setting _nr_pi_=40 (for example, default is 50).
+  2. The gene expression trajectory is sampled on a finer grid where each measurement interval is divided into four parts (by default). This can be made coarser by changing _nstep_ = 3 inside the function _BINGO_init_.
+  3. Number of pseudoinputs can be reduced inside _BINGO_init_ by setting _nr_pi_ = 40 (for example, default is 50).
   4. Reduce dimension by throwing out genes whose expression data contains merely noise (which actually should be done anyway). 
   5. If some genes are only interesting as potential regulators, they can be given to the method as inputs rather than as part of the time series data.
 
@@ -159,14 +159,16 @@ __Possible solutions:__
 `parfor`-loop  
 
   2. Run _BINGO_init_;  
-  3. The burn-in can be shortened by setting _parameters.its_=1000 (for example, default is 3000);  
+  3. The burn-in can be shortened by setting _parameters.its_ = 1000 (for example, default is 3000);  
   4. Run _BINGO_ with a suitable number of iterations;  
   5. Store results;  
 `end`
 
   6. Sum up the different _Plink_ matrices and divide by the total number of samples.
 
+  ## Updates on the method since publication of the article
   
+  __March 22, 2021:__ Hyperparameter sampling is changed from random walk to random walk in log-domain to make it scale-independent.
 
 
 
