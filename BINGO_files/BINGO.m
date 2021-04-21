@@ -66,8 +66,13 @@ if isfield(data,'ko')
 end
     
 %Prior probability for the existence of a link (default = 1/n)
-if ~isfield(parameters,'link_pr')
-    parameters.link_pr = 1/n;
+if isfield(parameters,'link_pr')
+    log_link_pr = log(parameters.link_pr);
+else
+    log_link_pr = -log(n)*ones(n,n+n_in);
+end
+if numel(log_link_pr) == 1
+    log_link_pr = log_link_pr*ones(n,n+n_in);
 end
 
 %Process the prior network information
@@ -236,7 +241,7 @@ for k = 1:parameters.its
         
         %Cost function value
         J1 = .5*nrY/q(i) - .5*ld'*ld+log(prod(diag(KC))) - .5*log(det(KM+1e-5*eye(M))) - (mbtr-matr*xs_old(i,derind)')'*(xs_old(i,derind+1)'-xs_old(i,derind)')/q(i) + .5/q(i)*norm(d'.^.5.*(mbtr-matr*xs_old(i,derind)'))^2;
-        PS = sum(S)*log(parameters.link_pr) + log(prod(p_bets));
+        PS = sum(S.*log_link_pr(i,:)) + log(prod(p_bets));
        
         %Acceptance of row i
         P_aux_ab = exp(.1*(ma(i)-matr+2*mb(i)-2*mbtr)/totvar(i));

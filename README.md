@@ -110,6 +110,13 @@ If some links are certainly known to exist or not to exist, this information can
 >
 > `data.sure = [0 0 1 -1; 0 0 0 1; 0 0 0 -1];`
 
+Links can also be given different Bayesian prior probabilities of existence. The prior proabilities are given in a field _parameters.link_pr_. This should be a matrix of size _n_ x _n_ matrix (or _n_ x (_n_ + _n_in_) where _n_in_ is the input dimension. If a certain link exists with (prior) probability _p_, then the corresponding element in _link_pr_ matrix is  _p_ / (1-_p_). If a link is known to exist or to not exist for sure, it is advised to use the _data.sure_ field, since that will speed up the MCMC sampling.
+
+
+
+
+
+
 ### Knockout time series
 
 If some time series correspond to gene knockout/knockdown experiments, then that time series should not be taken into account in the inference of links pointing to the knocked-out/down gene. Such information is included in the field _data.ko_. For example, if there are four time series, and the third corresponds to an experiment where the second gene is knocked out and the fourth time series corresponds to an experiment where the fourth and fifth genes are knocked out, it is given as follows:
@@ -118,9 +125,9 @@ If some time series correspond to gene knockout/knockdown experiments, then that
 
 ## Method parameters
 
-Method parameters are given to the _BINGO_-function as a structure called parameters. The values are set in the file _BINGO_init_, and it is not necessary to change these parameters, although it is advised that the user chooses a good value for the _link_pr_ parameter. The parameter fields are:  
+Method parameters are given to the _BINGO_-function as a structure called parameters. The values are set in the file _BINGO_init_, and it is not necessary to change these parameters. The parameter fields are:  
 
-  - _link_pr_: The prior for networks is that the existence of each link is independent of others. If a link exists with (prior) probability _p_, then _link_pr_ = _p_ / (1-_p_). This parameter controls the level of sparsity in the network samples. This should be specified by the user. For example, if there are 50 nodes, and it is expected that each node has about 2-3 (incoming/outgoing) links, then one should set, for example, _p_ = 2.5 / 50. However, if the user does not provide the parameter, the default value is _link_pr_ = 1/_n_.      
+  - _link_pr_: The prior for networks is that the existence of each link is independent of others. If a link exists with (prior) probability _p_, then _link_pr_ = _p_ / (1-_p_). This parameter controls the level of sparsity in the network samples. This can be specified by the user, but it is not necessary. For example, if there are 50 nodes, and it is expected that each node has about 2-3 (incoming/outgoing) links, then one should set, for example, _p_ = 2.5 / 50. However, if the user does not provide the parameter, the default value is _link_pr_ = 1/_n_. Note that this parameter can also be a matrix, if different priors are given for different links.      
   - _its_: number of iterations.   
   - _nstep_: number of steps in the “continuous” trajectory between the measurement times. Default value is 4. It can be reduced to 3 or even 2 if the sampling takes a very long time. If it is one, the method reduces to a kind of a discrete-time GPDM.  
   - _Theur_: a temperature variable used in a heuristic scheme to speed up the topology sampling. If _Theur_ is one, it corresponds to exact sampling. Higher _Theur_ improves the acceptance probability of the topology sampling.
@@ -169,6 +176,8 @@ __Possible solutions:__
   ## Updates on the method since publication of the article
   
   __March 22, 2021:__ Hyperparameter sampling is changed from random walk to random walk in log-domain to make it scale-independent.
+
+  __April 21, 2021:__ Prior probabilities of links can be different.
 
 
 
