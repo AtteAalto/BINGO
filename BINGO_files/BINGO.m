@@ -192,13 +192,18 @@ for k = 1:parameters.its
         end
         
         %Sample relevance parameters
-        beta = exp(log(betsold(i,:)) + parameters.ebeta*randn(1,n+n_in));
-        p_bets = exp(-abs(beta));
+        bets = (1-(parameters.ebeta)^2)^.5*betsold(i,:)+(parameters.ebeta)*randn(1,n+n_in);
+        beta = .5+.45*bets;
+        p_bets = exp(-abs(beta))./exp(-(beta-.5).^2/2/.45^2);
+        beta = abs(beta);
         
         %Sample other hyperparameters
-        gamma_tr = exp(log(gamma(i))+parameters.egamma*randn);
-        matr = exp(log(ma(i))+parameters.ea*randn);
-        mbtr = exp(log(mb(i))+parameters.eb*randn);
+        gamma_tr = gamma(i)+parameters.egamma*nry(i)*randn;
+        gamma_tr = 1e-4+abs(gamma_tr-1e-4);
+        matr = ma(i)+parameters.ea*randn;
+        matr = 1e-7+abs(matr-1e-7);
+        mbtr = mb(i)+parameters.eb*randn;
+        mbtr = 1e-7+abs(mbtr-1e-7);
     
         %Exclude the knockout data of gene i (if any)
         derind = derind_full;
@@ -259,7 +264,8 @@ for k = 1:parameters.its
         end
         
         %Sampling of measurement noise variance r(i)
-        rtr = exp(log(r(i))+parameters.er*randn);
+        rtr = r(i) + parameters.er*randn;
+        rtr = 1e-8 + abs(rtr-1e-8);
         if (r(i)/rtr)^(1+sum(nomiss(i,:))/2)*exp(.00001./r(i)-.00001./rtr+sum((y(i,find(nomiss(i,:)>.5))-yold(i,find(nomiss(i,:)>.5))).^2)/2*(1/r(i)-1/rtr)) > rand
             r(i) = rtr;
             accr(i) = accr(i) + 1;
@@ -270,7 +276,8 @@ for k = 1:parameters.its
     %% Trajectory sampling
     
     %Sample the process noise variance
-    qtr = exp(log(q)+parameters.eq*randn(size(q)));
+    qtr = q + parameters.eq*randn(size(q));
+    qtr = .5e-5 + abs(qtr-.5e-5);
     
     %Sample the trajectory
     for l = 1:size(Ser,2)

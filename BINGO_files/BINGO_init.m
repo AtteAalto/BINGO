@@ -3,15 +3,15 @@ function [data,state,parameters]=BINGO_init(data)
 %% Set the parameters of the sampler.
 
 %Step length of the Crank-Nicolson sampler (should be >.05)
-parameters.etraj = .06;
+parameters.etraj = .1;
 
 %Other step length parameters:
-parameters.egamma = .075;
-parameters.ea = .05;
-parameters.eb = .05;
-parameters.ebeta = .05;
-parameters.er = .05;
-parameters.eq = .04;
+parameters.egamma = .1;
+parameters.ea = .005;
+parameters.eb = .005;
+parameters.ebeta = .125;
+parameters.er = .0001;
+parameters.eq = .0002;
 
 %link_pr = p / (1-p) where p is the prior probability for the existence of
 %a link. This controls the sparsity level of the network. Default is 1/n if
