@@ -68,7 +68,7 @@ end
 %Check genes that are not knocked out in at least one experiment (normally
 %geneList = 1:n)
 geneList = find(sum(Incl,2)>0)';
-excludedGenes = setdiff(1:n,geneList)
+excludedGenes = setdiff(1:n,geneList);
 
 %Prior probability for the existence of a link (default = 1/n)
 if isfield(parameters,'link_pr')
