@@ -32,7 +32,7 @@ The data is given in a Matlab structure called _data_. The time series data is i
 >
 >`data.ts = {y1 , y2};`
 
-__If your data is uniformly sampled, with no external input, no missing measurements, no prior knowledge of the network, and none of the time series correspond to knockout/knockdown experiments, you are good to go. If this is not the case, read further.__
+__If your data is uniformly sampled, with no external input, no missing measurements, no prior knowledge of the network, and none of the time series correspond to knockout/knockdown experiments, you are good to go. If this is not the case, read further. BINGO can be applied on pseudotime series as well, but the data structure is slightly different.__
 
 ### Sampling times
 
@@ -123,6 +123,13 @@ If some time series correspond to gene knockout/knockdown experiments, then that
 
 `data.ko = {[ ] , [ ] , [2] , [4 5]};`
 
+### Pseudotime series
+
+__Note: The use of BINGO on pseudotime series was not discussed in the original publication, and no benchmarking has been done by the authors in this setup.__
+
+BINGO's trajectory sampling is designed to take into account the low sampling frequency of typical bulk gene expression measurements. However, the trajectory sampling makes sense also in the setup of single cell data after applying a pseudotime algorithm. Typically such data forms a fairly scattered point cloud. The trajectory sampling makes sense also in this case. BINGO will sample trajectories that pass through this point cloud. From computational point of view, the standard implementation of BINGO becomes too heavy (since it tries to interpolate the trajectory between each two pseudotime points), and therefore a modification is needed.
+
+
 ## Method parameters
 
 Method parameters are given to the _BINGO_-function as a structure called parameters. The values are set in the file _BINGO_init_, and it is not necessary to change these parameters. The parameter fields are:  
@@ -175,9 +182,11 @@ __Possible solutions:__
 
   ## Updates on the method since publication of the article
   
-  __March 22, 2021:__ Hyperparameter sampling is changed from random walk to random walk in log-domain to make it scale-independent.
+  __March 22, 2021:__ Hyperparameter sampling is changed from random walk to random walk in log-domain to make it scale-independent (reverted 21 July, 2021).
 
   __April 21, 2021:__ Prior probabilities of links can be different.
+
+  __July 21, 2021:__ Hyperparameter sampling in log-domain reverted. A bug in dealing with knockout time series fixed.
 
 
 

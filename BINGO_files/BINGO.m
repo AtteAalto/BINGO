@@ -63,8 +63,13 @@ if isfield(data,'ko')
     for jser = 1:size(ts,2)
         Incl(data.ko{jser},jser) = zeros(length(data.ko{jser}),1);
     end
-end
-    
+end 
+
+%Check genes that are not knocked out in at least one experiment (normally
+%geneList = 1:n)
+geneList = find(sum(Incl,2)>0)';
+excludedGenes = setdiff(1:n,geneList)
+
 %Prior probability for the existence of a link (default = 1/n)
 if isfield(parameters,'link_pr')
     log_link_pr = log(parameters.link_pr);
@@ -87,6 +92,11 @@ end
 Sold = max(Sold,S_aux);
 Sold = min(Sold,1+S_aux);
 S_aux = ones(n,n+n_in) - abs(S_aux);
+S_aux(:,excludedGenes) = 0;
+S_aux(excludedGenes,:) = 0;
+Sold(:,excludedGenes) = 0;
+Sold(excludedGenes,:) = 0;
+
 
 %Rows 3-4 of Ser show the indices of different experiments in the finer grid.
 Ser(3:4,1)  =[1; nstep*(Ser(2,1)-1)+1];
@@ -165,7 +175,7 @@ yold = xs_old(:,yind);
 tic; time_mark = toc;
 for k = 1:parameters.its
     %% Topology sampling
-    for i = 1:n
+    for i = geneList
         S = Sold(i,:);
         %Check whether topology for row i is sampled on this time step (or 
         %only hyperparameters)
@@ -233,6 +243,9 @@ for k = 1:parameters.its
         KNM = gamma_tr*exp(-KNM);
         
         %Compute the load
+        %[k i]
+        %size(d)
+        %size(KNM)
         KC = chol(KM+1/q(i)*((KNM'*(d'.*KNM))) + 1e-5*eye(M));
         der = ((xs_old(i,derind+1)'-xs_old(i,derind)') - d'.*(mbtr-matr*xs_old(i,derind)'))/q(i);
         ld  =(KC'\(KNM'*der));
@@ -295,7 +308,7 @@ for k = 1:parameters.its
             yhat(:,Ser(1,l):Ser(2,l)) = y(:,Ser(1,l):Ser(2,l)) + (1-parameters.etraj^2)^.5*(yold(:,Ser(1,l):Ser(2,l))-y(:,Ser(1,l):Ser(2,l))) + parameters.etraj*diag(r.^.5)*randn(n,Ser(2,l)-Ser(1,l)+1);   
         end        
         xs(:,Ser(3,l):Ser(4,l)) = sparse(diag((qtr./q).^.5))*(1-parameters.etraj^2)^.5*xs_old(:,Ser(3,l):Ser(4,l)) + (yhat(:,Ser(1,l):Ser(2,l))-sparse(diag((qtr./q).^.5))*(1-parameters.etraj^2)^.5*yold(:,Ser(1,l):Ser(2,l)))*Pr(1:(Ser(4,l)-Ser(3,l)+1),1:(Ser(2,l)-Ser(1,l)+1))'; 
-        xs(:,Ser(3,l)+1:Ser(4,l)) = xs(:,Ser(3,l)+1:Ser(4,l)) + parameters.etraj*sparse(diag(qtr.^.5))*((nstep*d((Ser(3,l):Ser(4,l)-1)-l+1)).^.5.*reshape([Pintc*randn(nstep-1,n*(Ser(2,l)-Ser(1,l)));zeros(1,n*(Ser(2,l)-Ser(1,l)))],[],n)'); 
+        xs(:,Ser(3,l)+1:Ser(4,l)) = xs(:,Ser(3,l)+1:Ser(4,l)) + parameters.etraj*sparse(diag(qtr.^.5))*((nstep*d_full((Ser(3,l):Ser(4,l)-1)-l+1)).^.5.*reshape([Pintc*randn(nstep-1,n*(Ser(2,l)-Ser(1,l)));zeros(1,n*(Ser(2,l)-Ser(1,l)))],[],n)'); 
     end
     
     % Sample the pseudoinputs, and "mirror" them to the box containing the data. 
@@ -307,7 +320,7 @@ for k = 1:parameters.its
     %Initialise the cost function value
     J1 = zeros(n,1);
     
-    for i = 1:n
+    for i = geneList
         %Exclude the knockout data of gene i (if any)
         derind = derind_full;
         d = d_full;
