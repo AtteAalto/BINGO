@@ -243,9 +243,6 @@ for k = 1:parameters.its
         KNM = gamma_tr*exp(-KNM);
         
         %Compute the load
-        %[k i]
-        %size(d)
-        %size(KNM)
         KC = chol(KM+1/q(i)*((KNM'*(d'.*KNM))) + 1e-5*eye(M));
         der = ((xs_old(i,derind+1)'-xs_old(i,derind)') - d'.*(mbtr-matr*xs_old(i,derind)'))/q(i);
         ld  =(KC'\(KNM'*der));
@@ -335,15 +332,16 @@ for k = 1:parameters.its
         N = length(derind);
         
         %Compute the covariances
+        beta = abs(.5+.45*betsold);
         KM = zeros(M,M);  %pseudoinputs
         KNM = zeros(N,M); %pseudoinput vs. trajectory
         for j = find(Sold(i,1:n)>.5)
-            KM = KM + betsold(i,j)*bsxfun(@minus,psin(j,:),psin(j,:)').^2;
-            KNM = KNM + betsold(i,j)*bsxfun(@minus,psin(j,:),xs(j,derind)').^2;
+            KM = KM + beta(i,j)*bsxfun(@minus,psin(j,:),psin(j,:)').^2;
+            KNM = KNM + beta(i,j)*bsxfun(@minus,psin(j,:),xs(j,derind)').^2;
         end
         for j = n+find(Sold(i,n+1:n+n_in)>.5)
-            KM = KM + betsold(i,j)*bsxfun(@minus,psin(j,:),psin(j,:)').^2;
-            KNM = KNM + betsold(i,j)*bsxfun(@minus,psin(j,:),u(j-n,:)').^2;
+            KM = KM + beta(i,j)*bsxfun(@minus,psin(j,:),psin(j,:)').^2;
+            KNM = KNM + beta(i,j)*bsxfun(@minus,psin(j,:),u(j-n,:)').^2;
         end
         KM = gamma(i)*exp(-KM);
         KNM = gamma(i)*exp(-KNM);
