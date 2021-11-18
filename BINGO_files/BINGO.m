@@ -321,10 +321,31 @@ for k = 1:parameters.its
             end   
         else
             yhat(:,Ser(1,l):Ser(2,l)) = y(:,Ser(1,l):Ser(2,l)) + (1-parameters.etraj^2)^.5*(yold(:,Ser(1,l):Ser(2,l))-y(:,Ser(1,l):Ser(2,l))) + parameters.etraj*diag(r.^.5)*randn(n,Ser(2,l)-Ser(1,l)+1);   
-        end        
+        end   
+        
+         %Force trajectories non-negative if specified
+        if isfield(data,'positive') && data.positive
+            yhat = abs(yhat);
+        end
+        
         xs(:,Ser(3,l):Ser(4,l)) = sparse(diag((qtr./q).^.5))*(1-parameters.etraj^2)^.5*xs_old(:,Ser(3,l):Ser(4,l)) + (yhat(:,Ser(1,l):Ser(2,l))-sparse(diag((qtr./q).^.5))*(1-parameters.etraj^2)^.5*yold(:,Ser(1,l):Ser(2,l)))*Pr(1:(Ser(4,l)-Ser(3,l)+1),1:(Ser(2,l)-Ser(1,l)+1))'; 
         xs(:,Ser(3,l)+1:Ser(4,l)) = xs(:,Ser(3,l)+1:Ser(4,l)) + parameters.etraj*sparse(diag(qtr.^.5))*((nstep*d_full((Ser(3,l):Ser(4,l)-1)-l+1)).^.5.*reshape([Pintc*randn(nstep-1,n*(Ser(2,l)-Ser(1,l)));zeros(1,n*(Ser(2,l)-Ser(1,l)))],[],n)'); 
     end
+    
+    
+    %Allow some trajectory components not to be sampled every time
+    if parameters.sampleShare < 1
+        notSampled = rand(n,1) > parameters.sampleShare;
+        xs(notSampled,:) = xs_old(notSampled,:);
+        yhat(notSampled,:) = yold(notSampled,:);
+        qtr(notSampled) = q(notSampled);
+    end
+
+    %Force trajectories non-negative if specified
+    if isfield(data,'positive') && data.positive
+        xs = max(xs,0);
+    end
+    
     
     % Sample the pseudoinputs, and "mirror" them to the box containing the data. 
     % This corresponds to uniform prior in the box.
