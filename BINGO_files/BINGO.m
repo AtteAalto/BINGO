@@ -123,6 +123,20 @@ if isfield(data,'missing')
             end
         end
     end
+else
+    for jser = 1:size(Ser,2)
+        data.missing{jser} = [];
+    end 
+end
+
+if isfield(data,'notMeasured')
+    for jser = 1:size(Ser,2)
+        nomiss(data.notMeasured{jser},Ser(1,jser):Ser(2,jser)) = 0;
+    end
+else
+    for jser = 1:size(Ser,2)
+        data.notMeasured{jser} = [];
+    end 
 end
 
 %Auxiliary indices showing which points in concatenated trajectory are used
@@ -291,16 +305,20 @@ for k = 1:parameters.its
     
     %Sample the trajectory
     for l = 1:size(Ser,2)
-        if isfield(data,'missing')  %Missing measurements
-            if size(data.missing{l},1) > .5
-                for i = 1:n
+        miss1 = size(data.missing{l},1) > .5;
+        miss2 = length(data.notMeasured{l}) > .5;
+        
+        if miss1 || miss2  %Missing measurements
+            for i = 1:n
+                if miss2 && min(abs(data.notMeasured{l} - i)) < .5
+                    yhat(i,Ser(1,l):Ser(2,l)) = yold(i,Ser(1,l):Ser(2,l)) + parameters.ey*randn(1,Ser(2,l)-Ser(1,l)+1);
+                else
                     Csam = missing_data_sampler(data.missing{l},Tsam{l},r(i),qtr(i),i);
                     coef = (1-parameters.etraj^2)^.5*nomiss(i,Ser(1,l):Ser(2,l)) + (qtr(i)/q(i))^.5*(1-nomiss(i,Ser(1,l):Ser(2,l)));
                     yhat(i,Ser(1,l):Ser(2,l)) = y(i,Ser(1,l):Ser(2,l)) + coef.*(yold(i,Ser(1,l):Ser(2,l))-y(i,Ser(1,l):Ser(2,l))) + parameters.etraj*randn(1,Ser(2,l)-Ser(1,l)+1)*Csam';
                 end
-            else
-                yhat(:,Ser(1,l):Ser(2,l)) = y(:,Ser(1,l):Ser(2,l)) + (1-parameters.etraj^2)^.5*(yold(:,Ser(1,l):Ser(2,l))-y(:,Ser(1,l):Ser(2,l))) + parameters.etraj*diag(r.^.5)*randn(n,Ser(2,l)-Ser(1,l)+1);   
-            end
+                
+            end   
         else
             yhat(:,Ser(1,l):Ser(2,l)) = y(:,Ser(1,l):Ser(2,l)) + (1-parameters.etraj^2)^.5*(yold(:,Ser(1,l):Ser(2,l))-y(:,Ser(1,l):Ser(2,l))) + parameters.etraj*diag(r.^.5)*randn(n,Ser(2,l)-Ser(1,l)+1);   
         end        

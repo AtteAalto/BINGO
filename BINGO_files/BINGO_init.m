@@ -74,6 +74,11 @@ if isfield(data,'missing')
     data.ts = missing_data_interpolation(data);
 end
 
+%Estimate genes that are not measured by fitting a linear model using the
+%common genes in different time series.
+if isfield(data,'notMeasured')
+    data = trajEst(data);
+end
 
 %Create times and indices for plotting the trajectory estimate.
 indlast = 0;
