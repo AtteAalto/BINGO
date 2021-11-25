@@ -279,7 +279,7 @@ for k = 1:parameters.its
             Sold(i,:) = S;
             Pold(i) = PS;
             Jold(i) = J1;
-            betsold(i,:) = beta;
+            betsold(i,:) = bets;
             gamma(i) = gamma_tr;
             ma(i) = matr;
             mb(i) = mbtr;
@@ -314,13 +314,13 @@ for k = 1:parameters.its
                     yhat(i,Ser(1,l):Ser(2,l)) = yold(i,Ser(1,l):Ser(2,l)) + parameters.ey*randn(1,Ser(2,l)-Ser(1,l)+1);
                 else
                     Csam = missing_data_sampler(data.missing{l},Tsam{l},r(i),qtr(i),i);
-                    coef = (1-parameters.etraj^2)^.5*nomiss(i,Ser(1,l):Ser(2,l)) + (qtr(i)/q(i))^.5*(1-nomiss(i,Ser(1,l):Ser(2,l)));
-                    yhat(i,Ser(1,l):Ser(2,l)) = y(i,Ser(1,l):Ser(2,l)) + coef.*(yold(i,Ser(1,l):Ser(2,l))-y(i,Ser(1,l):Ser(2,l))) + parameters.etraj*randn(1,Ser(2,l)-Ser(1,l)+1)*Csam';
+                    coef = (1-parameters.etraj0^2)^.5*nomiss(i,Ser(1,l):Ser(2,l)) + (qtr(i)/q(i))^.5*(1-nomiss(i,Ser(1,l):Ser(2,l)));
+                    yhat(i,Ser(1,l):Ser(2,l)) = y(i,Ser(1,l):Ser(2,l)) + coef.*(yold(i,Ser(1,l):Ser(2,l))-y(i,Ser(1,l):Ser(2,l))) + parameters.etraj0*randn(1,Ser(2,l)-Ser(1,l)+1)*Csam';
                 end
                 
             end   
         else
-            yhat(:,Ser(1,l):Ser(2,l)) = y(:,Ser(1,l):Ser(2,l)) + (1-parameters.etraj^2)^.5*(yold(:,Ser(1,l):Ser(2,l))-y(:,Ser(1,l):Ser(2,l))) + parameters.etraj*diag(r.^.5)*randn(n,Ser(2,l)-Ser(1,l)+1);   
+            yhat(:,Ser(1,l):Ser(2,l)) = y(:,Ser(1,l):Ser(2,l)) + (1-parameters.etraj0^2)^.5*(yold(:,Ser(1,l):Ser(2,l))-y(:,Ser(1,l):Ser(2,l))) + parameters.etraj0*diag(r.^.5)*randn(n,Ser(2,l)-Ser(1,l)+1);   
         end   
         
          %Force trajectories non-negative if specified

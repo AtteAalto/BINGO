@@ -4,6 +4,7 @@ function [data,state,parameters]=BINGO_init(data)
 
 %Step length of the Crank-Nicolson sampler (should be >.05)
 parameters.etraj = .1;
+parameters.etraj0 = .025;
 
 %Other step length parameters:
 parameters.egamma = .1;
@@ -32,6 +33,9 @@ nstep = 4;
 
 %Number of pseudoinputs. Tradeoff between accuracy/speed.
 nr_pi = 50;
+
+%The percentage of dimensions sampled at each time step.
+parameters.sampleShare = 1;
 
 %The cell array Tsam in the data-structure contains the sampling times of
 %the measurements. If the user doesn't specify these, this code creates 
@@ -77,6 +81,9 @@ end
 %Estimate genes that are not measured by fitting a linear model using the
 %common genes in different time series.
 if isfield(data,'notMeasured')
+    if ~isfield(data,'outlierTolerance')
+        data.outlierTolerance = 5;
+    end 
     data = trajEst(data);
 end
 
@@ -104,6 +111,7 @@ for jser = 1:size(data.ts,2)
     mins = min(mins,min(data.ts{jser},[],2));
 end
 
+data.factor = maxs-mins;
 for jser = 1:size(data.ts,2)
     data.ts{jser} = data.ts{jser}./(maxs-mins);
 end
