@@ -13,6 +13,7 @@ parameters.eb = .005;
 parameters.ebeta = .125;
 parameters.er = .0001;
 parameters.eq = .0002;
+parameters.ey = 1e-3;
 
 %link_pr = p / (1-p) where p is the prior probability for the existence of
 %a link. This controls the sparsity level of the network. Default is 1/n if

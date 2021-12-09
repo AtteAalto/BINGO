@@ -27,6 +27,12 @@ for jser = 1:length(data.ts)
                 ii2 = setdiff([1:iEst-1 iEst+1:ndim],data.notMeasured{jl});
                 iCommon = intersect(ii1,ii2);
 
+                %If iEst is the only common gene, it cannot be estimated
+                %using time seriel jl. In that case, skip that time series.
+                if isempty(iCommon)
+                    continue
+                end
+                    
                 %Form regression matrices
                 Scale = mean(mean(data.ts{jser}(iCommon,:)))/mean(mean(data.ts{jl}(iCommon,:)));
                 XX = [Scale*data.ts{jl}(iCommon,:); ones(1,size(data.ts{jl},2))];
