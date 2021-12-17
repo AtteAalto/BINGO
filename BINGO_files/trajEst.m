@@ -82,7 +82,7 @@ for jser = 1:length(data.ts)
                 %Trajectory estimation with the linear (static) model
                 aa = (XXc*XXc' + alpha^2*eye(size(XXc,1)))^-1*XXc*YY';
                 yestTemp = aa'*Xinc;
-                WW = sum((YY - aa'*XX).^2);
+                WW = sum((YY - aa'*XXc).^2);
                 
                 %Calculate the weighted average based on "training data" 
                 %residuals of individual time series
