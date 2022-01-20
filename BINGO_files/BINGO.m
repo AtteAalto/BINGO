@@ -26,13 +26,13 @@ end
 %Reform data
 Tsam = data.Tsam;
 ts = data.ts;
-u = [];
 if isfield(data,'input')
     if match_check(data.input,data.ts)
         error('Input size is not consistent with the time series data!')
     end
-    input = data.input;
-    u = input{1}(:,1:end-1);
+    n_in = size(data.input{1},1);
+else
+    n_in = 0;
 end
 
 %TS data is put in one matrix y. The matrix Ser keeps track of the indices
@@ -44,17 +44,12 @@ Ser(2,1) = size(y,2);
 for j = 2:size(ts,2)
     y = [y, ts{j}];
     Ser(1:2,j) = [Ser(2,j-1)+1; Ser(2,j-1)+size(ts{j},2)];
-    if isfield(data,'input')
-        u = [u,input{j}(:,1:end-1)];
-    end
 end
 
 %Check dimensions etc.
 n = size(y,1);
-n_in = size(u,1);
 nstep = (size(xs_old,2)-size(Ser,2))/(size(y,2)-size(Ser,2));
 M = size(psiold,2);
-rany = [[min(y')',max(y')'];[min(u')',max(u')']];
 
 %Check which variables are accounted for in each time series (excluding
 %knocked-out genes in respective experiments)
@@ -99,15 +94,17 @@ Sold(excludedGenes,:) = 0;
 
 
 %Rows 3-4 of Ser show the indices of different experiments in the finer grid.
-Ser(3:4,1)  =[1; nstep*(Ser(2,1)-1)+1];
+Ser(3:4,1) = [1; nstep*(Ser(2,1)-1)+1];
 for jser = 2:size(Ser,2)
     Ser(3:4,jser) = [Ser(4,jser-1)+1; Ser(4,jser-1)+nstep*(Ser(2,jser)-Ser(1,jser))+1];
 end
 
-%Concatenate inputs as well
-for j=1:size(u,2)
-    u=[u(:,1:(j-1)*nstep),u(:,(j-1)*nstep+1)*ones(1,nstep),u(:,(j-1)*nstep+2:end)];  
+%Concatenate and interpolate inputs as well
+u = [];
+if isfield(data,'input')
+    u = inputInterpolation(data, size(ts,2), nstep);
 end
+
 
 %Variables miss/nomiss shows which measurements are/aren't missing
 nomiss = ones(size(y));
@@ -152,7 +149,7 @@ for jser = 2:size(Ser,2)
 end
 d_full = reshape(ones(nstep,1)*d_full,1,[]);
 
-%Calculate signal (quadratic) variation
+%Calculate signal (quadratic) variation and range
 nry = 0;
 totvar = 0;
 Total_time = 0;
@@ -163,6 +160,7 @@ for l = 1:size(Ser,2)
 end 
 nry = nry./Total_time;
 totvar = totvar./Total_time;
+rany = [[min(y')',max(y')'];[min(u')',max(u')']];
 
 %Embedding of the measurements to a piecewise linear function
 mm = max(Ser(4,:)-Ser(3,:))+1;

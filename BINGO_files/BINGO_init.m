@@ -125,6 +125,11 @@ mins = maxs-1;
 n_in = 0;
 if isfield(data,'input')
     n_in = size(data.input{1},1);
+    
+    %Set default input interpolation method (zero-order-hold)
+    if ~isfield(data,'inputInterpolation')
+        data.inputInterpolation = 'ZOH';
+    end
 end
 
 %Initial connectivity guess
