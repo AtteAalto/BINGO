@@ -5,10 +5,7 @@ u = [];
 %Zero-order-hold
 if strcmp(data.inputInterpolation,'ZOH')
     for j = 1:nrTS
-        u = [u,data.input{j}(:,1:end-1)];
-    end
-    for j = 1:size(u,2)
-        u = [u(:,1:(j-1)*nstep),u(:,(j-1)*nstep+1)*ones(1,nstep),u(:,(j-1)*nstep+2:end)];  
+        u = [u,kron(data.input{j}(:,1:end-1),ones(1,nstep))];
     end
 end
 
@@ -28,21 +25,22 @@ if strcmp(data.inputInterpolation,'Sobolev')
         tFine = data.fine_times{j};
         tCoarse = tFine(1:nstep:end);
         
-        VDM = [ones(1,length(tCoarse)); tCoarse-mean(tCoarse)];
-        VDMbig = [ones(1,length(tFine)); tFine-mean(tFine)];
+        %Construct the library matrices of trigonometric functions
+        VDMCoarse = [ones(1,length(tCoarse)); tCoarse-.5*min(tCoarse)-.5*max(tCoarse)];
+        VDMFine = [ones(1,length(tFine)); tFine-.5*min(tCoarse)-.5*max(tCoarse)];
         ranT = max(tCoarse) - min(tCoarse);
         minT = min(tCoarse);
-        
         for jdeg = 1:maxdeg
-            VDM = [VDM; sin(2*jdeg*pi*(tCoarse-minT)/ranT); cos(2*jdeg*pi*(tCoarse-minT)/ranT)];
-            VDMbig = [VDMbig; sin(2*jdeg*pi*(tFine-minT)/ranT); cos(2*jdeg*pi*(tFine-minT)/ranT)];
+            VDMCoarse = [VDMCoarse; sin(2*jdeg*pi*(tCoarse-minT)/ranT); cos(2*jdeg*pi*(tCoarse-minT)/ranT)];
+            VDMFine = [VDMFine; sin(2*jdeg*pi*(tFine-minT)/ranT); cos(2*jdeg*pi*(tFine-minT)/ranT)];
         end
         
         u0 = zeros(size(data.input{j},1),length(tFine));
         for jn = 1:size(data.input{j},1)
 
-            aa = (VDM*VDM' + 1e-10*(2*pi)^4*ranT/2*diag([0 0 kron(1:maxdeg,[1 1])].^4))^-1*VDM*data.input{j}(jn,:)'; 
-            u0(jn,:) = aa'*VDMbig;
+            %Solve the regression problem penalising on the second derivative
+            aa = (VDMCoarse*VDMCoarse' + 1e-10*(2*pi)^4*ranT/2*diag([0 0 kron(1:maxdeg,[1 1])].^4))^-1*VDMCoarse*data.input{j}(jn,:)'; 
+            u0(jn,:) = aa'*VDMFine;
         end
     
         u = [u, u0(:,1:end-1)];
